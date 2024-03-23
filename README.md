@@ -46,21 +46,22 @@ Unit tests, crucial for verifying component behavior, are conducted using JUnit:
 
 ## Project Milestones & Roadmap
 
+### Upcoming Tasks
+- [ ] Implement `handleAppendEntryResponse`. This function is responsible for handling the `handleAppendEntry` response from the followers. 
+
+
 ### Completed Tasks
 - [x] Basic setup with maven. The aim is to make sure that the jar is created successfully with all the third party dependencies. Not just build but also be able to run it successfully.
 - [x] Unit testing setup with JUnit
-- [x] Implement both **inbound socket processor** & **outbound socket processor** . 
-- [x] Implement both **inbound queue** & **outbound queue**. 
+- [x] Implement both **inbound socket processor** & **outbound socket processor** .
+- [x] Implement both **inbound queue** & **outbound queue**.
 - [x] Implement the core logic of `Log`
 - [x] Thread which listens to the UDP packets from the internet. This thread holds **inbound socket processor**. This thread grabs the message from outside, converts the message into events and puts it into the **inbound queue**
 - [x] Thread which polls the **inbound queue** and forwards the request to `RaftServerLogic`
 - [x] Thread which sends the UDP package to the internet.  This thread polls the **outbound queue**
-- [x] Main thread which runs the CLI application. 
+- [x] Main thread which runs the CLI application.
 - [x] Decide on serialization & de-serialization strategy. Initially, I felt that both **inbound queue** & **outbound queue** should hold the `Event` type, but this strategy make the deserialization more complicated. Hence decided to create both the queues with different types - **inbound queue** with `string` type & **outbound queue** with `event` type.
 
-### Upcoming Tasks
-- [ ] Implement `handleAppendEntryResponse`. This function is responsible for handling the `handleAppendEntry` response from the followers. 
-- 
 
 This section provides a clear view of what has been achieved and what is still on the horizon, keeping both the project team and external contributors informed about the project's status and direction.
 
