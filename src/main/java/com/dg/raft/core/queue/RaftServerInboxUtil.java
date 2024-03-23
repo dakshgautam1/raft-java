@@ -4,12 +4,14 @@ package com.dg.raft.core.queue;
 import com.dg.raft.core.models.events.AddNewCommandEvent;
 import com.dg.raft.core.models.events.Event;
 import com.dg.raft.core.models.events.EventType;
+import com.google.gson.Gson;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 public class RaftServerInboxUtil {
+    private final Gson GSON = new Gson();
 
-    private final RaftServerQueue inboxQueue;
+    private final RaftServerQueue<String> inboxQueue;
 
     private final String serverName;
 
@@ -43,6 +45,6 @@ public class RaftServerInboxUtil {
     }
 
     private void publishEvent(Event event) {
-        inboxQueue.put(event); // Assuming publishMessage accepts RaftEvent type
+        inboxQueue.put(GSON.toJson(event)); // Assuming publishMessage accepts RaftEvent type
     }
 }

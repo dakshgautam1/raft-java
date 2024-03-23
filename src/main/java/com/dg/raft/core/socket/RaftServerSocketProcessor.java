@@ -9,13 +9,15 @@ import lombok.extern.log4j.Log4j2;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 
+import static com.dg.raft.core.util.Utils.getGsonWithRuntimeTypeAdapterFactory;
+
 @RequiredArgsConstructor
 @Log4j2
 public class RaftServerSocketProcessor implements Runnable {
 
     private final int port;
 
-    private final RaftServerQueue inboxQueue;
+    private final RaftServerQueue<String> inboxQueue;
 
     @Override
     public void run() {
@@ -25,7 +27,6 @@ public class RaftServerSocketProcessor implements Runnable {
             // Create a buffer to receive incoming data
             byte[] buffer = new byte[1024];
 
-            Gson gson = new Gson();
             while (true) {
                 // Create a DatagramPacket to hold the incoming data
                 DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
@@ -37,9 +38,8 @@ public class RaftServerSocketProcessor implements Runnable {
                 // Convert the packet data to a string and print it
                 String receivedData = new String(packet.getData(), 0, packet.getLength());
 
-                final Event event = gson.fromJson(receivedData, Event.class);
-                inboxQueue.put(event);
                 log.info("Received from client: " + receivedData);
+                inboxQueue.put(receivedData);
             }
         } catch (Exception e) {
             e.printStackTrace();

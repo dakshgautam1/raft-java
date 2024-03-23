@@ -1,6 +1,7 @@
 package com.dg.raft.core;
 
 import com.dg.raft.core.eventhandler.RaftInboxEventHandler;
+import com.dg.raft.core.models.events.Event;
 import com.dg.raft.core.queue.RaftServerInboxUtil;
 import com.dg.raft.core.queue.RaftServerOutboxUtil;
 import com.dg.raft.core.queue.RaftServerQueue;
@@ -26,7 +27,7 @@ public class RaftServerStartup {
 
 
         // Outbox Queue
-        final RaftServerQueue outboxQueue = new RaftServerQueue();
+        final RaftServerQueue<Event> outboxQueue = new RaftServerQueue<>();
 
 
         // Raft Server Outbox
@@ -50,7 +51,7 @@ public class RaftServerStartup {
         raftServerOutboxSocketProcessorThread.start();
 
         // Inbox Queue
-        final RaftServerQueue inboxQueue = new RaftServerQueue();
+        final RaftServerQueue<String> inboxQueue = new RaftServerQueue<>();
 
         // Starting the server that will listen to incoming messages.
         final Thread raftInboxEventHandlerThread = new Thread(

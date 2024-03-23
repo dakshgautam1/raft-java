@@ -24,12 +24,13 @@ public class RaftServerOutboxSocketProcessor implements Runnable {
     private static final List<EventType> ALLOWED_EVENT_TYPES = Arrays.asList(
             APPEND_ENTRY,
             APPEND_CLIENT_ENTRY,
+            APPEND_ENTRY_RESPONSE,
             TICK
     );
 
 
     private final int port;
-    private final RaftServerQueue outboxQueue;
+    private final RaftServerQueue<Event> outboxQueue;
 
     @Override
     public void run() {
@@ -53,6 +54,8 @@ public class RaftServerOutboxSocketProcessor implements Runnable {
 
     // Method to find the destination port from the event
     private String findDestinationServer(Event event) {
+
+        log.info("Find the destination server: {}", event);
         if (ALLOWED_EVENT_TYPES.contains(event.getEventType())) {
             return event.getDestServer();
         }

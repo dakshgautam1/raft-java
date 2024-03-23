@@ -6,15 +6,15 @@ import lombok.extern.log4j.Log4j2;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 @Log4j2
-public class RaftServerQueue {
+public class RaftServerQueue<T> {
 
-    private final BlockingQueue<Event> blockingQueue;
+    private final BlockingQueue<T> blockingQueue;
 
     public RaftServerQueue() {
         this.blockingQueue = new LinkedBlockingQueue<>();
     }
 
-    public void put(Event event) {
+    public void put(T event) {
         try {
             blockingQueue.put(event);
         } catch (InterruptedException e) {
@@ -22,7 +22,7 @@ public class RaftServerQueue {
         }
     }
 
-    public Event get() {
+    public T get() {
         try {
             return blockingQueue.take();
         } catch (InterruptedException e) {
