@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.dg.raft.core.ServerConfig.createServerMetadata;
 import static com.dg.raft.core.ServerConfig.getAllServers;
 
 @Log4j2
@@ -110,7 +111,9 @@ public class RaftServerLogic {
          */
         log.info("Received response with body: {}", eventResponse);
 
-
+        ServerMetadata serverMetadata = createServerMetadata(eventResponse.getSourceServer());
+        final int currentFollowerNextIndex = followerNextIndex.get(serverMetadata);
+        followerNextIndex.put(serverMetadata, currentFollowerNextIndex - 1);
     }
 
 

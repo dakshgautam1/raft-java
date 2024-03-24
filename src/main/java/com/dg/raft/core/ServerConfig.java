@@ -55,4 +55,8 @@ public class ServerConfig {
                 .map(e -> new ServerMetadata(e.getKey(), e.getValue()))
                 .collect(Collectors.toList());
     }
+
+    public static ServerMetadata createServerMetadata(final String serverName) {
+        return new ServerMetadata(serverName, SERVER_PORT_MAPPING.get(serverName));
+    }
 }
