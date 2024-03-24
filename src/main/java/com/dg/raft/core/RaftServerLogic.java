@@ -111,6 +111,12 @@ public class RaftServerLogic {
          */
         log.info("Received response with body: {}", eventResponse);
 
+        if (eventResponse.isSuccess()) {
+            log.info("HandleAppendEntry was successful for the follower: {}", eventResponse.getSourceServer());
+            return ;
+        }
+
+        log.info("HandleAppendEntry FAILED for the follower: {}, hence decreasing the index by 1", eventResponse.getSourceServer());
         ServerMetadata serverMetadata = createServerMetadata(eventResponse.getSourceServer());
         final int currentFollowerNextIndex = followerNextIndex.get(serverMetadata);
         followerNextIndex.put(serverMetadata, currentFollowerNextIndex - 1);
