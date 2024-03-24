@@ -65,6 +65,10 @@ Unit tests, crucial for verifying component behavior, are conducted using JUnit:
 
 This section provides a clear view of what has been achieved and what is still on the horizon, keeping both the project team and external contributors informed about the project's status and direction.
 
+## What If ?
+
+- Currently, `nextIndex` is decreased by 1 if the response we receive is false. But what happens if we get duplicate messages ? Then we will end up decreasing the nextIndex multiple times. 
+
 
 ## Conclusion
 
