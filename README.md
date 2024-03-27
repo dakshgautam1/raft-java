@@ -47,8 +47,6 @@ Unit tests, crucial for verifying component behavior, are conducted using JUnit:
 ## Project Milestones & Roadmap
 
 ### Upcoming Tasks
-- [ ] Implement `handleAppendEntryResponse`. This function is responsible for handling the `handleAppendEntry` response from the followers. 
-
 
 ### Completed Tasks
 - [x] Basic setup with maven. The aim is to make sure that the jar is created successfully with all the third party dependencies. Not just build but also be able to run it successfully.
@@ -61,6 +59,10 @@ Unit tests, crucial for verifying component behavior, are conducted using JUnit:
 - [x] Thread which sends the UDP package to the internet.  This thread polls the **outbound queue**
 - [x] Main thread which runs the CLI application.
 - [x] Decide on serialization & de-serialization strategy. Initially, I felt that both **inbound queue** & **outbound queue** should hold the `Event` type, but this strategy make the deserialization more complicated. Hence decided to create both the queues with different types - **inbound queue** with `string` type & **outbound queue** with `event` type.
+- [x] Implement `handleAppendEntryResponse`. This function is responsible for handling the `handleAppendEntry` response from the followers.
+- [x] After `nextIndex` is backtracked, we need a way to update the `nextIndex` to the right position, once the `handleAppend` entry becomes successful.
+- [x] Implement a timer thread which sends `TICK` events
+
 
 
 This section provides a clear view of what has been achieved and what is still on the horizon, keeping both the project team and external contributors informed about the project's status and direction.

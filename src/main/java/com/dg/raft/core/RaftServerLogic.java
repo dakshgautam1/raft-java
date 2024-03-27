@@ -6,6 +6,7 @@ import com.dg.raft.core.models.ServerMetadata;
 import com.dg.raft.core.models.events.AddNewCommandEvent;
 import com.dg.raft.core.models.events.AppendEntryEvent;
 import com.dg.raft.core.models.events.AppendEntryEventResponse;
+import com.dg.raft.core.models.events.HeartBeatEvent;
 import com.dg.raft.core.queue.RaftServerOutboxUtil;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,6 +29,11 @@ public class RaftServerLogic {
     private int currentTerm;
     private final RaftLog raftLog;
     private final RaftServerOutboxUtil raftServerOutboxUtil;
+    /**
+     * for each server, index of the next log entry
+     * to send to that server (initialized to leader
+     * last log index + 1)
+     */
     private final Map<ServerMetadata, Integer> followerNextIndex;
 
     public RaftServerLogic(
@@ -79,7 +85,7 @@ public class RaftServerLogic {
                         if (!server.equals(currentServerMetaData)) {
                             int prevIndex = followerNextIndex.get(server) - 1;
                             int prevTerm = raftLog.getLogDataList().get(prevIndex).getTerm();
-                            List<RaftLogData> entries = raftLog.getLogDataList().subList(
+                            final List<RaftLogData> entries = raftLog.getLogDataList().subList(
                                     prevIndex + 1,
                                     raftLog.getLogDataList().size()
                             );
@@ -106,50 +112,68 @@ public class RaftServerLogic {
         }
     }
     public void handleAppendEntryResponse(AppendEntryEventResponse eventResponse) {
-        /*
-            Will have to handle the response of the append entry from the followers
-         */
-        log.info("Received response with body: {}", eventResponse);
+        log.debug("Starting to handle AppendEntryResponse: {}", eventResponse);
+
+        ServerMetadata serverMetadata = createServerMetadata(eventResponse.getSourceServer());
+        log.debug("Created ServerMetadata for source server: {}", serverMetadata);
 
         if (eventResponse.isSuccess()) {
-            log.info("HandleAppendEntry was successful for the follower: {}", eventResponse.getSourceServer());
-            return ;
+            log.info("AppendEntry was successful for the follower: {}", eventResponse.getSourceServer());
+            int newNextIndex = eventResponse.getMatchIndex() + 1;
+            log.debug("Updating next index for server {} to {}", serverMetadata, newNextIndex);
+            followerNextIndex.put(serverMetadata, newNextIndex);
+        } else {
+            log.info("AppendEntry FAILED for the follower: {}, decreasing the index by 1", eventResponse.getSourceServer());
+            final int currentFollowerNextIndex = followerNextIndex.get(serverMetadata);
+            int newNextIndex = currentFollowerNextIndex - 1; // Ensure the index does not go below 1
+            log.debug("Decreasing next index for server {} to {}", serverMetadata, newNextIndex);
+            followerNextIndex.put(serverMetadata, newNextIndex);
         }
 
-        log.info("HandleAppendEntry FAILED for the follower: {}, hence decreasing the index by 1", eventResponse.getSourceServer());
-        ServerMetadata serverMetadata = createServerMetadata(eventResponse.getSourceServer());
-        final int currentFollowerNextIndex = followerNextIndex.get(serverMetadata);
-        followerNextIndex.put(serverMetadata, currentFollowerNextIndex - 1);
+        // Additional logging to confirm the state after handling the response
+        log.debug("Current next index for server {}: {}", serverMetadata, followerNextIndex.get(serverMetadata));
     }
 
 
+
     public void handleAppendEntries(AppendEntryEvent event) {
-        /*
-            - If you are a followed you will get the append entries from the leader.
+        log.info("Handling append entries request from {}: {}", event.getSourceServer(), event);
 
-        */
-
-        log.info("Received the handle appened entries for {}", event);
         boolean isSuccess = this.raftLog.appendEntries(
                 event.getPreviousIndex(),
                 event.getPrevTerm(),
                 event.getNewCommands()
         );
 
+        int matchIndex = isSuccess ? this.raftLog.getLogDataList().size() - 1 : -99;
+        // Log the outcome of the appendEntries operation
+        if (isSuccess) {
+            log.info("Append entries successful. Notifying {} with success response and index {}",
+                    event.getSourceServer(), matchIndex);
+        } else {
+            log.warn("Append entries failed. Notifying {} with failure response.", event.getSourceServer());
+        }
+
+        // Simplified call to publish response
         raftServerOutboxUtil.publishAppendEntryResponseToDestination(
                 currentServerMetaData.getServerName(),
                 event.getSourceServer(),
                 this.currentTerm,
-                this.raftLog.getLogDataList().size(),
+                matchIndex, // Use the calculated index based on success/failure
                 isSuccess
         );
     }
 
 
-    public void lightHeartBeat() {
-        /*
-            Send heart beats to your
-         */
+
+    public void handlerLeaderHeartBeat(HeartBeatEvent heartBeatEvent) {
+
+        if (this.isLeader()) {
+            log.info("Sending heartbeat events to all the followers.");
+            this.updateFollowers();
+        } else {
+            log.info("HeartBeatEvent is not applicable for followers.");
+        }
     }
 
     public void showLog() {

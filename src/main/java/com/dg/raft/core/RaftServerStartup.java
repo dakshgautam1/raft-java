@@ -1,6 +1,7 @@
 package com.dg.raft.core;
 
 import com.dg.raft.core.eventhandler.RaftInboxEventHandler;
+import com.dg.raft.core.heartbeat.Heartbeat;
 import com.dg.raft.core.models.events.Event;
 import com.dg.raft.core.queue.RaftServerInboxUtil;
 import com.dg.raft.core.queue.RaftServerOutboxUtil;
@@ -40,7 +41,7 @@ public class RaftServerStartup {
                 Integer.parseInt(serverName),
                 serverName,
                 serverPort,
-                true,
+                false,
                 raftServerOutboxUtil
         );
 
@@ -73,6 +74,15 @@ public class RaftServerStartup {
         RaftServerInboxUtil raftServerInboxUtil = new RaftServerInboxUtil(
                 inboxQueue, serverName
         );
+
+        // Start heart beat thread.
+        final Thread heartbeatThread = new Thread(
+                new Heartbeat(
+                    inboxQueue,
+                    serverName
+            )
+        );
+        heartbeatThread.start();
 
         startCli(raftServerInboxUtil);
 

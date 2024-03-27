@@ -27,18 +27,11 @@ public class RaftInboxEventHandler implements Runnable {
 
     private void registerEventHandlers() {
         eventHandlers.put(EventType.APPEND_ENTRY, eventAsString -> {
-            //if (event instanceof AppendEntryEvent) {
-                log.info("This is being calledd.....");
             raftServerLogic.handleAppendEntries(GSON.fromJson(eventAsString, AppendEntryEvent.class));
-//            } else {
-//                log.info("Unable to recognize this event as the instance");
-//            }
         });
 
         eventHandlers.put(EventType.APPEND_ENTRY_RESPONSE, eventAsString -> {
-            // if (event instanceof AppendEntryEventResponse) {
             raftServerLogic.handleAppendEntryResponse(GSON.fromJson(eventAsString, AppendEntryEventResponse.class));
-            //}
         });
 
         // For event types without additional data or without a specific subclass
@@ -68,9 +61,8 @@ public class RaftInboxEventHandler implements Runnable {
             //}
         });
 
-        eventHandlers.put(EventType.SEND_HEART_BEAT, event -> {
-                raftServerLogic.updateFollowers();
-
+        eventHandlers.put(EventType.SEND_HEART_BEAT, eventAsString -> {
+                raftServerLogic.handlerLeaderHeartBeat(GSON.fromJson(eventAsString, HeartBeatEvent.class));
         });
     }
 
@@ -79,11 +71,9 @@ public class RaftInboxEventHandler implements Runnable {
     public void run() {
         while (true) {
             String eventAsString = inboxQueue.get();
-            log.info("Consuming the events from the inbox queue - {}", eventAsString);
 
             Event event = GSON.fromJson(eventAsString, Event.class);
 
-            log.info("Event is here - {}", event);
 
             Consumer<String> handler = eventHandlers.get(event.getEventType());
             if (handler != null) {

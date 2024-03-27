@@ -14,5 +14,4 @@ public enum EventType {
     APPEND_ENTRY_RESPONSE,
 
     APPEND_CLIENT_ENTRY,
-    TICK
 }

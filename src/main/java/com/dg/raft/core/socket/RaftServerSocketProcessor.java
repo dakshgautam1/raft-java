@@ -1,15 +1,11 @@
 package com.dg.raft.core.socket;
 
-import com.dg.raft.core.models.events.Event;
 import com.dg.raft.core.queue.RaftServerQueue;
-import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-
-import static com.dg.raft.core.util.Utils.getGsonWithRuntimeTypeAdapterFactory;
 
 @RequiredArgsConstructor
 @Log4j2

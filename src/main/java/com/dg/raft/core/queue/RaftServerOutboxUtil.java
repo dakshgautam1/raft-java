@@ -3,6 +3,7 @@ package com.dg.raft.core.queue;
 import com.dg.raft.core.models.events.AppendEntryEvent;
 import com.dg.raft.core.models.RaftLogData;
 import com.dg.raft.core.models.events.AppendEntryEventResponse;
+import com.dg.raft.core.models.events.Event;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
@@ -12,7 +13,7 @@ import java.util.List;
 @Log4j2
 public class RaftServerOutboxUtil {
 
-    private final RaftServerQueue raftServerQueue;
+    private final RaftServerQueue<Event> raftServerQueue;
 
     public void publishAppendEntryToDestination(String src, int prevIndex, int prevTerm, String dest, List<RaftLogData> entries) {
         // Log before publishing
@@ -30,19 +31,19 @@ public class RaftServerOutboxUtil {
             String src,
             String dest,
             int currentTerm,
-            int logSize,
+            int matchIndex,
             boolean isAppendSuccessful) {
 
         // Log before publishing
-        log.info("Publishing AppendEntryResponse: Source: {}, Destination: {}, CurrentTerm: {}, LogSize: {}, IsAppendSuccessful: {}",
-                src, dest, currentTerm, logSize, isAppendSuccessful);
+        log.info("Publishing AppendEntryResponse: Source: {}, Destination: {}, CurrentTerm: {}, MatchIndex: {}, IsAppendSuccessful: {}",
+                src, dest, currentTerm, matchIndex, isAppendSuccessful);
 
         final AppendEntryEventResponse appendEntryEventResponse =
                 new AppendEntryEventResponse(
                         src,
                         dest,
                         currentTerm,
-                        logSize,
+                        matchIndex,
                         isAppendSuccessful
                 );
 

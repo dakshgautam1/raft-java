@@ -24,8 +24,7 @@ public class RaftServerOutboxSocketProcessor implements Runnable {
     private static final List<EventType> ALLOWED_EVENT_TYPES = Arrays.asList(
             APPEND_ENTRY,
             APPEND_CLIENT_ENTRY,
-            APPEND_ENTRY_RESPONSE,
-            TICK
+            APPEND_ENTRY_RESPONSE
     );
 
 
